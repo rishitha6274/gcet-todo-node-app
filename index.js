@@ -1,7 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import userRouter from "./routes/userRoutes.js";
 import todoRouter from "./routes/todoRoutes.js";
 import dotenv from "dotenv";
 
@@ -19,7 +18,6 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.use("/users", userRouter);
 app.use("/todos", todoRouter);
 
 mongoose

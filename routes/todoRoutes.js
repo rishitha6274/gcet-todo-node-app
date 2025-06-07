@@ -1,24 +1,12 @@
 import express from "express";
 import Todo from "../models/todoModel.js";
-import userModel from "../models/userModel.js"; 
 
 const todoRouter = express.Router();
-// todoRouter.get("/test", (req, res) => {
-//   res.json({ message: "Todo router is working!" });
-// });
-// todoRouter.post("/", (req, res) => {
-//   console.log("Received body:", req.body);
-//   res.json({ message: "POST /todos works!", received: req.body });
-// });
 
-
-todoRouter.post("/", async (req, res) => {
-  const { email, task } = req.body;
+todoRouter.post("/new", async (req, res) => {
+  const { task } = req.body;
   try {
-    const user = await userModel.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const newTodo = await Todo.create({ userId: user._id, task });
+    const newTodo = await Todo.create({ task, completed: false });
     res.status(201).json(newTodo);
   } catch (error) {
     console.error("Error creating todo:", error);
@@ -26,12 +14,9 @@ todoRouter.post("/", async (req, res) => {
   }
 });
 
-todoRouter.get("/:email", async (req, res) => {
+todoRouter.get("/all", async (req, res) => {
   try {
-    const user = await userModel.findOne({ email: req.params.email });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const todos = await Todo.find({ userId: user._id });
+    const todos = await Todo.find();
     res.json(todos);
   } catch (error) {
     console.error("Error fetching todos:", error);
@@ -39,34 +24,23 @@ todoRouter.get("/:email", async (req, res) => {
   }
 });
 
-todoRouter.put("/:email", async (req, res) => {
+todoRouter.put("/update", async (req, res) => {
   try {
-    const user = await userModel.findOne({ email: req.params.email });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const updated = await Todo.updateMany(
-      { userId: user._id }, 
-      req.body,
-      { new: true }
-    );
-
+    const { id, ...updates } = req.body;
+const updated = await Todo.findByIdAndUpdate(id, updates, { new: true });
     res.json({ message: `${updated.modifiedCount} todos updated` });
   } catch (error) {
     res.status(500).json({ message: "Failed to update todos" });
   }
 });
 
-todoRouter.delete("/:email", async (req, res) => {
+todoRouter.delete("/delete", async (req, res) => {
   try {
-    const user = await userModel.findOne({ email: req.params.email });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const deleted = await Todo.deleteMany({ userId: user._id });
+    const deleted = await Todo.deleteMany();
     res.json({ message: `${deleted.deletedCount} todos deleted` });
   } catch (error) {
     res.status(500).json({ message: "Failed to delete todos" });
   }
 });
-
 
 export default todoRouter;
