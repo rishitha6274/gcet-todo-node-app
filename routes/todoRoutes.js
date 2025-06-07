@@ -13,6 +13,16 @@ todoRouter.post("/new", async (req, res) => {
     res.status(500).json({ message: "Failed to create todo" });
   }
 });
+todoRouter.put("/update/:id", async (req, res) => {
+  const { id } = req.params;
+  const { completed } = req.body;
+  try {
+    const updated = await Todo.findByIdAndUpdate(id, { completed }, { new: true });
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update todo" });
+  }
+});
 
 todoRouter.get("/all", async (req, res) => {
   try {
@@ -24,23 +34,16 @@ todoRouter.get("/all", async (req, res) => {
   }
 });
 
-todoRouter.put("/update", async (req, res) => {
+
+todoRouter.delete("/delete/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id, ...updates } = req.body;
-const updated = await Todo.findByIdAndUpdate(id, updates, { new: true });
-    res.json({ message: `${updated.modifiedCount} todos updated` });
+    await Todo.findByIdAndDelete(id);
+    res.json({ message: "Todo deleted" });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update todos" });
+    res.status(500).json({ message: "Failed to delete todo" });
   }
 });
 
-todoRouter.delete("/delete", async (req, res) => {
-  try {
-    const deleted = await Todo.deleteMany();
-    res.json({ message: `${deleted.deletedCount} todos deleted` });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to delete todos" });
-  }
-});
 
 export default todoRouter;
